@@ -1,0 +1,42 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: ./backend
+    container_name: legaltech_backend
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./backend/.env
+    depends_on:
+      - mongo
+      - postgres
+    volumes:
+      - ./backend:/app
+    command: npm run dev
+
+  mongo:
+    container_name: mongo_legaltech
+    ports:
+      - "27017:27017"
+    env_file:
+      - ./legaltech_bdd/mongo-docker/.env
+    build:
+      context: ./legaltech_bdd/mongo-docker
+    volumes:
+      - mongo_data:/data/db
+
+  postgres:
+    container_name: postgres_legaltech
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./legaltech_bdd/postgres-docker/.env
+    build:
+      context: ./legaltech_bdd/postgres-docker
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  mongo_data:
+  postgres_data:
