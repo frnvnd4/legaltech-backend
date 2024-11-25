@@ -1,29 +1,34 @@
 const Ticket = require('../models/Ticket');
-const ChatTicket = require('../models/ChatTicket');
+const Chat = require('../models/Chat');
 const TicketAssignment = require('../models/TicketAssignment');
-// Crear un ticket
+
 exports.createTicket = async (req, res) => {
-  const { title, description} = req.body;
+  const { chat_id, title, description } = req.body;
+  const userId = req.user.userId;
 
   try {
-    const ticket = await Ticket.create({
+    // Buscar el historial del chat actual del usuario
+    const existingChat = await Chat.findById(chat_id);
+    if (!existingChat) {
+      return res.status(404).json({ error: 'El chat especificado no existe.' });
+    }
+
+    // Crear el ticket en PostgreSQL
+    const newTicket = await Ticket.create({
       title,
       description,
-      priority: 'medium', // Prioridad predeterminada
-      user_id: req.user.userId, // Extraer del token del usuario autenticado
+      user_id: userId,
+      chat_id,
     });
 
-    // Crear el chat asociado al ticket
-    await ChatTicket.create({
-      ticket_id: ticket.ticket_id,
-      user_id: req.user.userId,
-      messages: [],
+    res.status(201).json({
+      message: 'Ticket creado y asociado al chat existente.',
+      ticket: newTicket,
+      chat: existingChat,
     });
-
-    res.status(201).json({ message: 'Ticket creado exitosamente', ticket });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: 'Error al crear el ticket', error: error.message });
+    console.error('Error al crear ticket asociado a chat existente:', error.message);
+    res.status(500).json({ error: 'No se pudo crear el ticket asociado al chat.' });
   }
 };
 
@@ -138,7 +143,7 @@ exports.getTicketDetails = async (req, res) => {
     }
 
     // Obtener el historial de chat del ticket desde MongoDB
-    const chat = await ChatTicket.findOne({ ticket_id: id });
+    const chat = await Chat.findOne({ ticket_id: id });
 
     // Si tiene acceso, devolver la información del ticket y el chat
     res.status(200).json({
@@ -148,5 +153,36 @@ exports.getTicketDetails = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error al obtener el ticket', error: error.message });
+  }
+};
+
+// Obtener todos los tickets (solo para administradores)
+exports.getAllTickets = async (req, res) => {
+  try {
+    // Recuperar todos los tickets
+    const tickets = await Ticket.findAll({
+      include: [
+        {
+          model: TicketAssignment,
+          attributes: ['clinic_id'], // Incluir la clínica asignada (si aplica)
+        },
+      ],
+    });
+
+    // Mapear los chats asociados desde MongoDB
+    const chatPromises = tickets.map(async (ticket) => {
+      const chat = await Chat.findOne({ ticket_id: ticket.ticket_id });
+      return {
+        ...ticket.dataValues,
+        chat: chat ? chat.messages : [], // Incluir los mensajes del chat si existen
+      };
+    });
+
+    const ticketsWithChats = await Promise.all(chatPromises);
+
+    res.status(200).json(ticketsWithChats);
+  } catch (error) {
+    console.error('Error al obtener todos los tickets:', error.message);
+    res.status(500).json({ message: 'Error al obtener los tickets', error: error.message });
   }
 };

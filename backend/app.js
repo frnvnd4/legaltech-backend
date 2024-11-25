@@ -8,7 +8,7 @@ const clinicRoutes = require('./src/routes/clinicRoutes');
 const ticketRoutes = require('./src/routes/ticketRoutes');
 const ticketAssignmentRoutes = require('./src/routes/ticketAssignmentRoutes');
 const chatRoutes = require('./src/routes/chatRoutes');
-
+require('events').EventEmitter.defaultMaxListeners = 15;
 
 // Inicializar la app
 const app = express();
@@ -50,7 +50,7 @@ app.use(cors());
 // Uso de rutas
 app.use('/api/auth', authRoutes); // Rutas de autenticación
 app.use('/api/users', userRoutes); // Rutas de usuarios
-app.use('/api', clinicRoutes); // Rutas de Clínicas Jurídicas
+app.use('/api/clinics', clinicRoutes); // Rutas de Clínicas Jurídicas
 app.use('/api/tickets', ticketRoutes); // Rutas para tickets
 app.use('/api/ticket-assignments', ticketAssignmentRoutes); // Rutas para asignaciones
 app.use('/api/chats', chatRoutes); // Rutas para chats

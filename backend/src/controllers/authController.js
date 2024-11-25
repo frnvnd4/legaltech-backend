@@ -139,6 +139,3 @@ exports.signOut = async (req, res) => {
     res.status(500).json({ message: "Error al cerrar sesión", error: error.message });
   }
 };
-
-
-

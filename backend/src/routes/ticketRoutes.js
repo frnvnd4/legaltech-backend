@@ -1,15 +1,16 @@
 const express = require('express');
 const ticketController = require('../controllers/ticketController');
-const { authenticateToken } = require('../middlewares/authenticates');
+const { authenticateToken, authenticateAdmin } = require('../middlewares/authenticates');
 
 const router = express.Router();
 
-// Solo usuarios autenticados)
+// Solo usuarios autenticados
 router.post('/', authenticateToken, ticketController.createTicket);
 router.get('/', authenticateToken, ticketController.getUserTickets);
 router.put('/:id', authenticateToken, ticketController.updateTicket);
 router.delete('/:id', authenticateToken, ticketController.deleteTicket);
 router.get('/:id', authenticateToken, ticketController.getTicketDetails);
+router.get('/all', authenticateToken, authenticateAdmin, ticketController.getAllTickets);
 // Actualizar estado y prioridad: Solo administradores y clínicas
 router.put('/:id/status',authenticateToken,
   (req, res, next) => {

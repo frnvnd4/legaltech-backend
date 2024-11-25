@@ -39,6 +39,10 @@ const Ticket = sequelize.define('Ticket', {
     },
     onDelete: 'CASCADE', // Eliminar los tickets si el usuario es eliminado
   },
+  chat_id: {
+    type: DataTypes.STRING, // Almacena el ObjectId del chat en MongoDB como texto
+    allowNull: true, // Puede no tener un chat asociado inicialmente
+  },
   created_at: {
     type: DataTypes.DATE,
     defaultValue: Sequelize.NOW,
@@ -54,3 +58,4 @@ User.hasMany(Ticket, { foreignKey: 'user_id' });
 Ticket.belongsTo(User, { foreignKey: 'user_id' });
 
 module.exports = Ticket;
+
