@@ -2,6 +2,7 @@ const express = require('express');
 const chatController = require('../controllers/chatController');
 const { authenticateToken } = require('../middlewares/authenticates');
 
+
 const router = express.Router();
 
 // Obtener el chat de un ticket

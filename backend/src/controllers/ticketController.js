@@ -9,6 +9,7 @@ exports.createTicket = async (req, res) => {
   try {
     // Buscar el historial del chat actual del usuario
     const existingChat = await Chat.findById(chat_id);
+    console.log(chat_id);
     if (!existingChat) {
       return res.status(404).json({ error: 'El chat especificado no existe.' });
     }

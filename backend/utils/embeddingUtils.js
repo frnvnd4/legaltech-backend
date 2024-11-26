@@ -93,8 +93,9 @@ async function queryMessage(query, data, model, tokenBudget) {
 
     // Introducción y pregunta
     const introduction =
-      'Utiliza los artículos y leyes que te proporciono para responder a las preguntas. Por favor, en la respuesta indica todos los números de ley o decreto relacionados que estás utilizando para responder, además de su nombre. Las leyes estarán separadas por temática, como delincuencia, empresas, familia, trabajo y salud.';
-    const question = `\n\nQuestion: ${query}`;
+      'Utiliza los artículos y leyes que te proporciono para responder a las preguntas. Por favor, en la respuesta indica todos los números de ley o decreto relacionados que estás utilizando para responder, además de su nombre. Las leyes estarán separadas por temática.';
+    const question = `\n\nQuestion: ${query}`;    
+      
     let message = introduction;
 
     // Construir el mensaje iterando sobre los resultados relacionados
@@ -122,11 +123,11 @@ async function queryMessage(query, data, model, tokenBudget) {
 async function ask(query, data, typeParam, model=GPT_MODEL, tokenBudget = 4000) {
   try {
     const systemMessages = {
-      '1': "Eres un experto en temas de familia, matrimonio, divorcio, padres, hijos, abuelos, hermanos, tíos, primos, sobrinos, nietos, amor, hogar, unidad, apoyo, cuidado, convivencia, tradición, parientes, afecto, crianza, educación, lazos y otras palabras relacionadas, dentro del sistema legal chileno. Sin embargo, si la pregunta no tiene palabras relacionadas con la temática principal (familia), debes responder de manera un poco vaga, indicando que no eres experto en el tema, pero que posees un poco de conocimiento. Si la pregunta sí tiene relación con el tema principal, debes responder de manera exhaustiva. Debes decir al comienzo de tu respuesta que eres un abogado experto en familia. No incluyas informacion extra que sepas de alguna otra fuente. Debes responder solamente en base a la base de conocimientos proporcionada. Debes responder como si fueras un abogado experto en leyes chilenas. Da respuestas amables.",
-      '2': "Eres un experto en temas de trabajo, licencias médicas, post natal, empleador, imposiciones, contratos, vacaciones, despidos, empleo, ocupación, profesión, carrera, salario, jefe, oficina, colegas, horario, responsabilidades, proyecto, tareas, reuniones, capacitación, desempeño, contrato, empleo, productividad, promoción, jubilación y otras palabras relacionadas, dentro del sistema legal chileno. Sin embargo, si la pregunta no tiene palabras relacionadas con la temática principal (trabajo), debes responder de manera un poco vaga, indicando que no eres experto en el tema, pero que posees un poco de conocimiento. Si la pregunta sí tiene relación con el tema principal, debes responder de manera exhaustiva. Debes decir al comienzo de tu respuesta que eres un abogado experto en trabajo. No incluyas informacion extra que sepas de alguna otra fuente. Debes responder solamente en base a la base de conocimientos proporcionada. Debes responder como si fueras un abogado experto en leyes chilenas. Da respuestas amables.",
+      '1': "Eres un experto en temas de familia, divorcios, pensiones alimenticias, demandas y temas relacionados dentro del sistema legal chileno. Debes responder como un abogado experto, siendo amable, y tus respuestas deben ser concisas, coherentes y cohesivas. No debes exceder las 60 palabras para responder.",
+      '2': "Eres un experto en temas de trabajo, leyes laborales, código del trabajo, licencias, vacaciones y temas relacionados dentro del sistema legal chileno. Debes responder como un abogado experto, siendo amable, y tus respuestas deben ser concisas, coherentes y cohesivas. No debes exceder las 60 palabras para responder."
     };
 
-    const systemMessage = systemMessages[typeParam] || 'Eres un abogado experto.';
+    const systemMessage = systemMessages[typeParam] || 'Eres un abogado experto, pero no te indicaron la temática. Por favor, exige que te la indiquen para dar tu respuesta.';
     const message = await queryMessage(query, data, model, tokenBudget);
 
     const response = await openai.chat.completions.create({
